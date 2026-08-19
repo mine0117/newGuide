@@ -106,10 +106,10 @@
     #info .desc{padding:0}
     #info .sc-head{padding:10px 14px 6px}
     #info .sc-body{padding:0 14px 12px}
-    #info .sc-img{height:auto}
+    #info .sc-img{height:180px}
     #info .sc-loc{padding:0 14px 6px}
-    #infoHandle{width:100%;padding:10px 0 6px;display:flex;justify-content:center;align-items:center;cursor:ns-resize;flex-shrink:0;touch-action:none;position:sticky;top:0;z-index:2;background:rgba(245,248,240,.98);border-radius:16px 16px 0 0}
-    #infoHandle::after{content:'';display:block;width:40px;height:4px;background:rgba(100,160,65,.35);border-radius:2px}
+    #infoHandle{width:100%;padding:18px 0 12px;display:flex;justify-content:center;align-items:center;cursor:ns-resize;flex-shrink:0;touch-action:none;position:sticky;top:0;z-index:2;background:rgba(245,248,240,.98);border-radius:16px 16px 0 0}
+    #infoHandle::after{content:'';display:block;width:52px;height:5px;background:rgba(100,160,65,.5);border-radius:3px}
     /* 목록 터치 타깃 */
     .blist{margin-top:8px;padding:0 14px 4px}
     .blist .it{min-height:44px;padding:8px 7px;font-size:13px}
@@ -118,7 +118,7 @@
     /* 3D 레이블 */
     .lb{font-size:10px;padding:2px 7px}
     /* 프로그램·일정 카드 */
-    .sc-img{height:auto}
+    .sc-img{height:180px}
     .gview-inner{padding:10px 12px;gap:8px}
     .tl-card{padding:9px 10px;gap:8px}
     .tl-time{flex:0 0 40px;font-size:11px}
@@ -140,7 +140,7 @@
   .gview-inner{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
   .spot-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
   .spot-bar{height:4px;width:100%}
-  .sc-img{width:100%;height:auto;display:block}
+  .sc-img{width:100%;height:220px;object-fit:cover;object-position:center top;display:block;image-rendering:-webkit-optimize-contrast}
   .sc-head{display:flex;align-items:flex-start;gap:10px;padding:12px 14px 6px}
   .sc-icon{font-size:24px;line-height:1;flex:0 0 auto;padding-top:2px}
   .sc-title{font-size:14px;font-weight:700;margin:0 0 1px}
@@ -989,6 +989,7 @@ document.getElementById('infoScrollBtn').onclick = function(){
     startY   = clientY;
     startH   = info.offsetHeight;
     dragging = true;
+    info.scrollTop        = 0;   /* 스크롤 위치 초기화 */
     info.style.transition = 'none';
     info.style.overflow   = 'hidden'; /* 스크롤이 드래그 가로채는 것 방지 */
   }
@@ -1027,8 +1028,9 @@ document.getElementById('infoScrollBtn').onclick = function(){
 
   /* 터치 이벤트 (iOS에서 pointer보다 안정적) */
   handle.addEventListener('touchstart', function(e){
+    e.preventDefault(); /* 브라우저 스크롤 선점 차단 */
     dragStart(e.touches[0].clientY);
-  }, { passive: true });
+  }, { passive: false });
   handle.addEventListener('touchmove', function(e){
     e.preventDefault();
     dragMove(e.touches[0].clientY);
