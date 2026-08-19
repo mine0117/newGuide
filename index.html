@@ -29,7 +29,7 @@
   #top h1{font-size:14px;margin:0;font-weight:700;letter-spacing:-.2px;white-space:nowrap}
   #top .meta{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .tabs{margin-left:auto;display:flex;gap:4px;background:rgba(195,218,170,.4);padding:3px;border-radius:9px}
-  .tabs button{background:none;border:none;color:var(--muted);font:inherit;font-size:12.5px;
+  .tabs button{background:none;border:none;color:var(--muted);font:inherit;font-size:14px;
     font-family:'Black Han Sans',sans-serif;padding:6px 13px;border-radius:7px;cursor:pointer}
   .tabs button.on{background:#6DAE3E;color:#fff;font-weight:600}
 
@@ -97,7 +97,7 @@
     #top{padding:0 4px env(safe-area-inset-bottom,0px);border-bottom:none;border-top:1px solid var(--line);min-height:54px;align-items:stretch;background:#E6EBE0}
     #top h1,#top .meta{display:none}
     .tabs{margin-left:0;flex:1;background:transparent;border-radius:0;padding:4px 2px;gap:2px;justify-content:space-around;align-items:stretch;overflow-x:visible}
-    .tabs button{flex:1;font-size:11px;padding:6px 4px;min-height:48px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;line-height:1.2;white-space:normal}
+    .tabs button{flex:1;font-size:13px;padding:6px 4px;min-height:48px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;line-height:1.2;white-space:normal}
     .tabs button.on{background:rgba(109,174,62,.18);color:var(--accent)}
     /* 정보 패널 → 하단 시트 */
     #info{left:0;right:0;bottom:0;top:auto;width:auto;height:auto;max-height:50vh;border-radius:16px 16px 0 0;border-left:none;border-right:none;border-bottom:none;padding:0 0 env(safe-area-inset-bottom,12px);overflow-y:auto;-webkit-overflow-scrolling:touch;transition:max-height .35s cubic-bezier(.32,.72,0,1), transform .35s cubic-bezier(.32,.72,0,1)}
@@ -985,38 +985,77 @@ document.getElementById('infoScrollBtn').onclick = function(){
   if (!handle) return;
   var startY, startH, dragging;
 
-  handle.addEventListener('pointerdown', function(e){
-    e.stopPropagation();
-    handle.setPointerCapture(e.pointerId);
-    startY = e.clientY;
-    startH = info.offsetHeight;
+  function dragStart(clientY){
+    startY   = clientY;
+    startH   = info.offsetHeight;
     dragging = true;
     info.style.transition = 'none';
-  });
-  handle.addEventListener('pointermove', function(e){
+    info.style.overflow   = 'hidden'; /* 스크롤이 드래그 가로채는 것 방지 */
+  }
+  function dragMove(clientY){
     if (!dragging || startY === undefined) return;
-    var dy = e.clientY - startY;
+    var dy = clientY - startY;
     if (dy > 0) {
-      /* 아래로 드래그: 패널 따라 내려감 */
       info.style.transform = 'translateY(' + dy + 'px)';
     } else {
-      /* 위로 드래그: 높이 확장 */
       info.style.transform = '';
       var newH = Math.min(Math.max(startH + (-dy), 80), window.innerHeight * 0.72);
       info.style.maxHeight = newH + 'px';
     }
-  });
-  handle.addEventListener('pointerup', function(e){
-    if (startY === undefined) return;
+  }
+  function dragEnd(clientY){
+    if (!dragging || startY === undefined) return;
     dragging = false;
-    var dy = e.clientY - startY;
+    var dy = clientY - startY;
+    info.style.overflow   = 'auto';
     info.style.transition = '';
-    if (dy > 60) {
+    if (dy > 40) {
       slideDownInfo(info);
     } else {
       info.style.transform = 'translateY(0)';
     }
     startY = undefined;
+  }
+  function dragCancel(){
+    if (!dragging) return;
+    dragging = false;
+    startY = undefined;
+    info.style.overflow   = 'auto';
+    info.style.transition = '';
+    info.style.transform  = 'translateY(0)';
+  }
+
+  /* 터치 이벤트 (iOS에서 pointer보다 안정적) */
+  handle.addEventListener('touchstart', function(e){
+    dragStart(e.touches[0].clientY);
+  }, { passive: true });
+  handle.addEventListener('touchmove', function(e){
+    e.preventDefault();
+    dragMove(e.touches[0].clientY);
+  }, { passive: false });
+  handle.addEventListener('touchend', function(e){
+    dragEnd(e.changedTouches[0].clientY);
+  }, { passive: true });
+  handle.addEventListener('touchcancel', dragCancel, { passive: true });
+
+  /* 마우스 (데스크톱) */
+  handle.addEventListener('pointerdown', function(e){
+    if (e.pointerType === 'touch') return; /* 터치는 위에서 처리 */
+    e.stopPropagation();
+    handle.setPointerCapture(e.pointerId);
+    dragStart(e.clientY);
+  });
+  handle.addEventListener('pointermove', function(e){
+    if (e.pointerType === 'touch') return;
+    dragMove(e.clientY);
+  });
+  handle.addEventListener('pointerup', function(e){
+    if (e.pointerType === 'touch') return;
+    dragEnd(e.clientY);
+  });
+  handle.addEventListener('pointercancel', function(e){
+    if (e.pointerType === 'touch') return;
+    dragCancel();
   });
 
   /* 3D 캔버스 탭하면 다시 표시 */
@@ -1291,7 +1330,7 @@ function buildMapPins(){
   var pinsEl = document.getElementById('mapPins');
   if(!pinsEl) return;
   pinsEl.innerHTML = '';
-  SPOTS.forEach(function(s){
+SPOTS.forEach(function(s){
     if(!s.mapPos) return;
     var pin = document.createElement('div');
     pin.className = 'map-pin';
