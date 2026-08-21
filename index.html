@@ -1288,6 +1288,12 @@ function selectSpot(id){
 buildSpotMarkers();
 renderList();
 
+/* === 슬라이드 이미지 프리로드 === */
+SPOTS.forEach(function(s){
+  var srcs = s.imgs || (s.img ? [s.img] : []);
+  srcs.forEach(function(src){ var i=new Image(); i.src=src; });
+});
+
 /* === 스팟 이미지 카드 (HTML 오버레이) === */
 var spotCardEls = [];
 SPOTS.forEach(function(s){
