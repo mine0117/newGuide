@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>명성 수련회 · 장소 & 프로그램 안내</title>
+<title>다시 사랑하水 · 장소 & 프로그램 안내</title>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -150,6 +150,10 @@
   .sc-slide-dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2}
   .sc-slide-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.45);transition:background .3s}
   .sc-slide-dot.on{background:#fff}
+  .sc-slide-prev,.sc-slide-next{position:absolute;top:50%;transform:translateY(-50%);z-index:3;background:rgba(0,0,0,.35);color:#fff;border:none;width:30px;height:30px;border-radius:50%;font-size:18px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background .2s}
+  .sc-slide-prev:hover,.sc-slide-next:hover{background:rgba(0,0,0,.6)}
+  .sc-slide-prev{left:8px}
+  .sc-slide-next{right:8px}
   .sc-head{display:flex;align-items:flex-start;gap:10px;padding:12px 14px 6px}
   .sc-icon{font-size:24px;line-height:1;flex:0 0 auto;padding-top:2px}
   .sc-title{font-size:14px;font-weight:700;margin:0 0 1px}
@@ -1144,10 +1148,10 @@ var SPOTS = [
     location:'벧엘관 옆 야외 쉼터', color:'#26C6DA', icon:'⛱️',
     items:['헤세드 히브리어 포토존','야외 의자 & 해먹 휴식'],
     tip:'야외 쉼터에서 편하게 쉬어가세요!' },
-  { id:'photo_indoor', nm:'키캡&키링(대식당 뒤)', sub:'거울 셀카 + 키캡 키링 + 타투 스티커', zone:'shelter',
+  { id:'photo_indoor', nm:'키캡&키링(대식당 뒤)', sub:'키캡 키링 + 타투 스티커', zone:'indoor',
     px:[800,680], mapPos:[52,18], img:'키링실물.png', imgs:['키링실물.png','포토존4.jpg'],
     location:'대식당 뒤 실내', color:'#26C6DA', icon:'⌨️',
-    items:['키캡 키링 만들기','4가지 디자인 중 선택 후 조립','타투 스티커 체험'],
+    items:['키캡 키링 만들기','4가지 디자인 중 선택 후 조립','타투 스티커 체험','🔤 헤세드 히브리어 포토존'],
     tip:'키캡은 준비위원에게 직접 받아서 조립! 타투 스티커도 함께 체험!' },
   { id:'board_game', nm:'보드게임존(구식당)', sub:'실내에서 시원하게!', zone:'board',
     px:[750,510], mapPos:[70,65],
@@ -1206,7 +1210,7 @@ function selectSpot(id){
     s.imgs.forEach(function(src,i){ html+='<img src="'+src+'" class="sc-img'+(i===0?' ss-active':'')+'" alt="'+s.nm+'">'; });
     html+='<div class="sc-slide-dots">';
     s.imgs.forEach(function(_,i){ html+='<span class="sc-slide-dot'+(i===0?' on':'')+'"></span>'; });
-    html+='</div></div>';
+    html+='</div><button class="sc-slide-prev">&#8249;</button><button class="sc-slide-next">&#8250;</button></div>';
   } else if(s.img){
     html+='<img src="'+s.img+'" class="sc-img" alt="'+s.nm+'">';
   }
@@ -1252,6 +1256,10 @@ function selectSpot(id){
         clearInterval(window._infoSlideTimer); infoSlide(dx<0?1:-1);
         window._infoSlideTimer=setInterval(function(){ infoSlide(1); },3000);
       });
+      function resetInfoTimer(dir){ clearInterval(window._infoSlideTimer); infoSlide(dir); window._infoSlideTimer=setInterval(function(){ infoSlide(1); },3000); }
+      var prevBtn=ssEl.querySelector('.sc-slide-prev'), nextBtn=ssEl.querySelector('.sc-slide-next');
+      if(prevBtn) prevBtn.addEventListener('click',function(e){ e.stopPropagation(); resetInfoTimer(-1); });
+      if(nextBtn) nextBtn.addEventListener('click',function(e){ e.stopPropagation(); resetInfoTimer(1); });
     }
   }
   renderList();
@@ -1464,8 +1472,8 @@ var TIMELINE = [
 ];
 
 /* === PHOTO VIEW === */
-var ZONE_COLOR={water:'#2196F3',photo:'#E91E63',shelter:'#26C6DA',board:'#FF9800'};
-var ZONE_LABEL={water:'물놀이',photo:'포토존',shelter:'쉼터존',board:'보드게임'};
+var ZONE_COLOR={water:'#2196F3',photo:'#E91E63',shelter:'#26C6DA',board:'#FF9800',indoor:'#26C6DA'};
+var ZONE_LABEL={water:'물놀이',photo:'포토존',shelter:'쉼터존',board:'보드게임',indoor:'키캡&키링&타투스티커'};
 var photoInited=false;
 function initPhotoView(){
   if(photoInited) return; photoInited=true;
@@ -1479,13 +1487,14 @@ function initPhotoView(){
       s.imgs.forEach(function(src,i){ html+='<img src="'+src+'" class="sc-img'+(i===0?' ss-active':'')+'" alt="'+s.nm+'">'; });
       html+='<div class="sc-slide-dots">';
       s.imgs.forEach(function(_,i){ html+='<span class="sc-slide-dot'+(i===0?' on':'')+'"></span>'; });
-      html+='</div></div>';
+      html+='</div><button class="sc-slide-prev">&#8249;</button><button class="sc-slide-next">&#8250;</button></div>';
     } else if(s.img) html+='<img src="'+s.img+'" class="sc-img" alt="'+s.nm+'">';
     else html+='<div class="spot-bar" style="background:'+zc+'"></div>';
     html+='<div class="sc-head"><div class="sc-icon">'+s.icon+'</div>';
     html+='<div><p class="sc-title">'+s.nm+'</p><p class="sc-sub">'+s.sub+'</p></div></div>';
     html+='<p class="sc-loc">📍 '+s.location+'</p>';
-    html+='<div class="sc-body"><span class="zone-badge" style="background:'+zc+'22;color:'+zc+'">'+zl+'</span>';
+    html+='<div class="sc-body">';
+    if(zl) html+='<span class="zone-badge" style="background:'+zc+'22;color:'+zc+'">'+zl+'</span>';
     html+='<ul class="sc-items">';
     s.items.forEach(function(it){ html+='<li>'+it+'</li>'; });
     html+='</ul>';
@@ -1531,6 +1540,10 @@ function initPhotoView(){
       clearInterval(timer); goSlide(dx<0?1:-1);
       timer=setInterval(function(){ goSlide(1); },3000);
     });
+    function resetTimer(dir){ clearInterval(timer); goSlide(dir); timer=setInterval(function(){ goSlide(1); },3000); }
+    var prevBtn=el.querySelector('.sc-slide-prev'), nextBtn=el.querySelector('.sc-slide-next');
+    if(prevBtn) prevBtn.addEventListener('click',function(e){ e.stopPropagation(); resetTimer(-1); });
+    if(nextBtn) nextBtn.addEventListener('click',function(e){ e.stopPropagation(); resetTimer(1); });
   });
 }
 
