@@ -1147,9 +1147,9 @@ var SPOTS = [
     px:[490,470], mapPos:[34,95], img:'쉼터존1.png',
     location:'벧엘관 옆 야외 쉼터', color:'#26C6DA', icon:'⛱️',
     items:['헤세드 히브리어 포토존','야외 의자 & 해먹 휴식'],
-    tip:'야외 쉼터에서 편하게 쉬어가세요!' },
+    tip:'야외 쉼터에서 편하게 쉬어가세요!', hidden:true },
   { id:'photo_indoor', nm:'키캡&키링(대식당 뒤)', sub:'키캡 키링 + 타투 스티커', zone:'indoor',
-    px:[800,680], mapPos:[52,18], img:'키링실물.png', imgs:['키링실물.png','포토존4.jpg'],
+    px:[800,680], mapPos:[52,18], img:'키링키캡.jpg', imgs:['키링키캡.jpg','타투스티커.jpg','포토존4.jpg'],
     location:'대식당 뒤 실내', color:'#26C6DA', icon:'⌨️',
     items:['키캡 키링 만들기','4가지 디자인 중 선택 후 조립','타투 스티커 체험','🔤 헤세드 히브리어 포토존'],
     tip:'키캡은 준비위원에게 직접 받아서 조립! 타투 스티커도 함께 체험!' },
@@ -1237,7 +1237,7 @@ function selectSpot(id){
         sImgs[sIdx].classList.remove('ss-active'); sDots[sIdx].classList.remove('on');
         sIdx=next;
       }
-      window._infoSlideTimer=setInterval(function(){ infoSlide(1); },3000);
+      window._infoSlideTimer=setInterval(function(){ infoSlide(1); },7000);
       var isx=null;
       ssEl.addEventListener('touchstart',function(e){ isx=e.touches[0].clientX; },{passive:true});
       ssEl.addEventListener('touchend',function(e){
@@ -1245,7 +1245,7 @@ function selectSpot(id){
         var dx=e.changedTouches[0].clientX-isx; isx=null;
         if(Math.abs(dx)<30) return;
         clearInterval(window._infoSlideTimer); infoSlide(dx<0?1:-1);
-        window._infoSlideTimer=setInterval(function(){ infoSlide(1); },3000);
+        window._infoSlideTimer=setInterval(function(){ infoSlide(1); },7000);
       },{passive:true});
       var imx=null;
       ssEl.addEventListener('mousedown',function(e){ imx=e.clientX; });
@@ -1254,9 +1254,9 @@ function selectSpot(id){
         var dx=e.clientX-imx; imx=null;
         if(Math.abs(dx)<30) return;
         clearInterval(window._infoSlideTimer); infoSlide(dx<0?1:-1);
-        window._infoSlideTimer=setInterval(function(){ infoSlide(1); },3000);
+        window._infoSlideTimer=setInterval(function(){ infoSlide(1); },7000);
       });
-      function resetInfoTimer(dir){ clearInterval(window._infoSlideTimer); infoSlide(dir); window._infoSlideTimer=setInterval(function(){ infoSlide(1); },3000); }
+      function resetInfoTimer(dir){ clearInterval(window._infoSlideTimer); infoSlide(dir); window._infoSlideTimer=setInterval(function(){ infoSlide(1); },7000); }
       var prevBtn=ssEl.querySelector('.sc-slide-prev'), nextBtn=ssEl.querySelector('.sc-slide-next');
       if(prevBtn) prevBtn.addEventListener('click',function(e){ e.stopPropagation(); resetInfoTimer(-1); });
       if(nextBtn) nextBtn.addEventListener('click',function(e){ e.stopPropagation(); resetInfoTimer(1); });
@@ -1521,7 +1521,7 @@ function initPhotoView(){
       imgs[cur].classList.remove('ss-active'); dots[cur].classList.remove('on');
       cur=next;
     }
-    var timer=setInterval(function(){ goSlide(1); },3000);
+    var timer=setInterval(function(){ goSlide(1); },7000);
     var sx=null;
     el.addEventListener('touchstart',function(e){ sx=e.touches[0].clientX; },{passive:true});
     el.addEventListener('touchend',function(e){
@@ -1529,7 +1529,7 @@ function initPhotoView(){
       var dx=e.changedTouches[0].clientX-sx; sx=null;
       if(Math.abs(dx)<30) return;
       clearInterval(timer); goSlide(dx<0?1:-1);
-      timer=setInterval(function(){ goSlide(1); },3000);
+      timer=setInterval(function(){ goSlide(1); },7000);
     },{passive:true});
     var mdx=null;
     el.addEventListener('mousedown',function(e){ mdx=e.clientX; });
@@ -1538,9 +1538,9 @@ function initPhotoView(){
       var dx=e.clientX-mdx; mdx=null;
       if(Math.abs(dx)<30) return;
       clearInterval(timer); goSlide(dx<0?1:-1);
-      timer=setInterval(function(){ goSlide(1); },3000);
+      timer=setInterval(function(){ goSlide(1); },7000);
     });
-    function resetTimer(dir){ clearInterval(timer); goSlide(dir); timer=setInterval(function(){ goSlide(1); },3000); }
+    function resetTimer(dir){ clearInterval(timer); goSlide(dir); timer=setInterval(function(){ goSlide(1); },7000); }
     var prevBtn=el.querySelector('.sc-slide-prev'), nextBtn=el.querySelector('.sc-slide-next');
     if(prevBtn) prevBtn.addEventListener('click',function(e){ e.stopPropagation(); resetTimer(-1); });
     if(nextBtn) nextBtn.addEventListener('click',function(e){ e.stopPropagation(); resetTimer(1); });
