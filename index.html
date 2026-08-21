@@ -106,7 +106,8 @@
     #info .desc{padding:0}
     #info .sc-head{padding:10px 14px 6px}
     #info .sc-body{padding:0 14px 12px}
-    #info .sc-img{height:auto}
+    #info .sc-img{height:auto;max-height:200px;object-fit:cover}
+    #info .sc-slideshow{aspect-ratio:4/3;max-height:200px}
     #info .sc-loc{padding:0 14px 6px}
     #infoHandle{width:100%;padding:18px 0 12px;display:flex;justify-content:center;align-items:center;cursor:ns-resize;flex-shrink:0;touch-action:none;position:sticky;top:0;z-index:2;background:rgba(245,248,240,.98);border-radius:16px 16px 0 0}
     #infoHandle::after{content:'';display:block;width:52px;height:5px;background:rgba(100,160,65,.5);border-radius:3px}
@@ -141,6 +142,12 @@
   .spot-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
   .spot-bar{height:4px;width:100%}
   .sc-img{width:100%;height:auto;display:block;image-rendering:-webkit-optimize-contrast}
+  .sc-slideshow{position:relative;overflow:hidden;background:#111;aspect-ratio:4/3}
+  .sc-slideshow .sc-img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .8s ease;z-index:0}
+  .sc-slideshow .sc-img.ss-active{opacity:1;z-index:1}
+  .sc-slide-dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2}
+  .sc-slide-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.45);transition:background .3s}
+  .sc-slide-dot.on{background:#fff}
   .sc-head{display:flex;align-items:flex-start;gap:10px;padding:12px 14px 6px}
   .sc-icon{font-size:24px;line-height:1;flex:0 0 auto;padding-top:2px}
   .sc-title{font-size:14px;font-weight:700;margin:0 0 1px}
@@ -1124,21 +1131,21 @@ var SPOTS = [
     px:[700,350], mapPos:[45,92], img:'포토존4.jpg',
     location:'산책로', color:'#E91E63', icon:'📸',
     items:['헤세드 액자 프레임 설치'],
-    tip:'프레임 안에 서서 팀원들과 단체 사진!' },
-  { id:'photo_2', nm:'포토존②', sub:'헤세드 포토 프레임', zone:'photo',
-    px:[700,350], mapPos:[22,85], img:'포토존3.jpg',
+    tip:'프레임 안에 서서 팀원들과 단체 사진!', hidden:true },
+  { id:'photo_2', nm:'포토존', sub:'헤세드 포토 프레임', zone:'photo',
+    px:[700,350], mapPos:[27,85], img:'포토존3.jpg',
     location:'쉼터존 인근', color:'#FFC107', icon:'📷',
     items:['헤세드 포토 프레임 체험'],
     tip:'포토존①과 함께 이용하세요!' },
   { id:'photo_shelter', nm:'쉼터존', sub:'헤세드 히브리어 포토존', zone:'shelter',
-    px:[490,470], mapPos:[32,92], img:'쉼터존1.png',
+    px:[490,470], mapPos:[32,95], img:'쉼터존1.png',
     location:'벧엘관 옆 야외 쉼터', color:'#26C6DA', icon:'⛱️',
     items:['헤세드 히브리어 포토존','야외 의자 & 해먹 휴식'],
     tip:'야외 쉼터에서 편하게 쉬어가세요!' },
   { id:'photo_indoor', nm:'키캡&키링(대식당 뒤)', sub:'거울 셀카 + 키캡 키링 + 타투 스티커', zone:'shelter',
-    px:[800,680], mapPos:[52,18], img:'키링실물.png',
+    px:[800,680], mapPos:[52,18], img:'키링실물.png', imgs:['키링실물.png','포토존4.jpg'],
     location:'대식당 뒤 실내', color:'#26C6DA', icon:'⌨️',
-    items:['거울 셀카 & 헤세드 포토존','키캡 키링 만들기','4가지 디자인 중 선택 후 조립','타투 스티커 체험'],
+    items:['키캡 키링 만들기','4가지 디자인 중 선택 후 조립','타투 스티커 체험'],
     tip:'키캡은 준비위원에게 직접 받아서 조립! 타투 스티커도 함께 체험!' },
   { id:'board_game', nm:'보드게임존(구식당)', sub:'실내에서 시원하게!', zone:'board',
     px:[750,510], mapPos:[70,65],
@@ -1151,7 +1158,7 @@ var SPOTS = [
 var spotPickables=[], spotLabelEls=[], selSpot=null;
 function buildSpotMarkers(){
   SPOTS.forEach(function(s){
-    if(!s.px) return;
+    if(s.hidden||!s.px) return;
     var wx=mx(s.px[0]), wz=mz(s.px[1]);
     var zc=parseInt((s.color||'#607D8B').replace('#',''),16);
     /* 기둥 */
@@ -1192,6 +1199,15 @@ function selectSpot(id){
   var zl=(ZONE_LABEL&&ZONE_LABEL[s.zone])||s.zone;
   t.textContent=''; su.textContent='';
   var html='';
+  if(s.imgs && s.imgs.length>1){
+    html+='<div class="sc-slideshow" id="ss-info">';
+    s.imgs.forEach(function(src,i){ html+='<img src="'+src+'" class="sc-img'+(i===0?' ss-active':'')+'" alt="'+s.nm+'">'; });
+    html+='<div class="sc-slide-dots">';
+    s.imgs.forEach(function(_,i){ html+='<span class="sc-slide-dot'+(i===0?' on':'')+'"></span>'; });
+    html+='</div></div>';
+  } else if(s.img){
+    html+='<img src="'+s.img+'" class="sc-img" alt="'+s.nm+'">';
+  }
   html+='<div class="sc-head"><div class="sc-icon">'+s.icon+'</div>';
   html+='<div><p class="sc-title">'+s.nm+'</p><p class="sc-sub">'+s.sub+'</p></div></div>';
   html+='<p class="sc-loc">📍 '+s.location+'</p>';
@@ -1204,6 +1220,18 @@ function selectSpot(id){
   if(s.notice) html+='<p class="sc-notice">⚠️ '+s.notice+'</p>';
   html+='</div>';
   d.innerHTML=html;
+  if(window._infoSlideTimer){ clearInterval(window._infoSlideTimer); window._infoSlideTimer=null; }
+  if(s.imgs && s.imgs.length>1){
+    var ssEl=document.getElementById('ss-info');
+    if(ssEl){
+      var sImgs=ssEl.querySelectorAll('.sc-img'), sDots=ssEl.querySelectorAll('.sc-slide-dot'), sIdx=0;
+      window._infoSlideTimer=setInterval(function(){
+        sImgs[sIdx].classList.remove('ss-active'); sDots[sIdx].classList.remove('on');
+        sIdx=(sIdx+1)%sImgs.length;
+        sImgs[sIdx].classList.add('ss-active'); sDots[sIdx].classList.add('on');
+      },5000);
+    }
+  }
   renderList();
   /* 패널 표시 및 높이 조절 */
   var info=document.getElementById('info');
@@ -1233,7 +1261,7 @@ renderList();
 /* === 스팟 이미지 카드 (HTML 오버레이) === */
 var spotCardEls = [];
 SPOTS.forEach(function(s){
-  if(!s.img || !s.px) return;
+  if(s.hidden||!s.img || !s.px) return;
   var wx = mx(s.px[0]), wz = mz(s.px[1]);
   var div = document.createElement('div');
   div.className = 'spot-billboard';
@@ -1334,7 +1362,7 @@ function buildMapPins(){
   if(!pinsEl) return;
   pinsEl.innerHTML = '';
 SPOTS.forEach(function(s){
-    if(!s.mapPos) return;
+    if(s.hidden||!s.mapPos) return;
     var pin = document.createElement('div');
     pin.className = 'map-pin';
     pin.id = 'mpin_' + s.id;
@@ -1401,8 +1429,8 @@ var TIMELINE = [
     desc:'물풍선 받기 대결 · 팀장 전원 참여 · 승리팀 저녁예배 자리 우선선택권' },
   { time:'15:30', label:'2부 자유 물놀이', location:'잔디 운동장', group:'part2',
     desc:'워터슬라이드 · 풀장 · 물총 미니게임 자유 이용' },
-  { time:'14:00', label:'포토존 상시 운영', location:'산책로 · 야외쉼터 · 실내쉼터', group:'rest',
-    desc:'헤세드 액자 프레임 · 히브리어 포토존 · 거울 셀카 · 키캡 키링 만들기 · 타투 스티커 (14:00–16:00)' },
+  { time:'14:00', label:'포토존 상시 운영', location:'야외쉼터 · 실내쉼터', group:'rest',
+    desc:'히브리어 포토존 · 거울 셀카 · 키캡 키링 만들기 · 타투 스티커 (14:00–16:00)' },
   { time:'14:00', label:'키캡&키링(대식당 뒤)', location:'대식당 뒤 실내', group:'rest',
     desc:'4가지 디자인 키캡 선택 · 준비위원에게 키트 수령 후 조립' },
   { time:'14:00', label:'보드게임존(구식당) 상시', location:'구식당', group:'rest',
@@ -1421,9 +1449,16 @@ function initPhotoView(){
   if(photoInited) return; photoInited=true;
   var c=document.getElementById('photoCards'), html='';
   SPOTS.forEach(function(s){
+    if(s.hidden) return;
     var zc=ZONE_COLOR[s.zone]||'#607D8B', zl=ZONE_LABEL[s.zone]||s.zone;
     html+='<div class="spot-card" id="pcard-'+s.id+'">';
-    if(s.img) html+='<img src="'+s.img+'" class="sc-img" alt="'+s.nm+'">';
+    if(s.imgs && s.imgs.length>1){
+      html+='<div class="sc-slideshow" id="ss-'+s.id+'">';
+      s.imgs.forEach(function(src,i){ html+='<img src="'+src+'" class="sc-img'+(i===0?' ss-active':'')+'" alt="'+s.nm+'">'; });
+      html+='<div class="sc-slide-dots">';
+      s.imgs.forEach(function(_,i){ html+='<span class="sc-slide-dot'+(i===0?' on':'')+'"></span>'; });
+      html+='</div></div>';
+    } else if(s.img) html+='<img src="'+s.img+'" class="sc-img" alt="'+s.nm+'">';
     else html+='<div class="spot-bar" style="background:'+zc+'"></div>';
     html+='<div class="sc-head"><div class="sc-icon">'+s.icon+'</div>';
     html+='<div><p class="sc-title">'+s.nm+'</p><p class="sc-sub">'+s.sub+'</p></div></div>';
@@ -1440,9 +1475,21 @@ function initPhotoView(){
   });
   html+='<div class="reel-banner"><p class="rb-title">📹 팀 릴스 제출 마감 18:00</p>';
   html+='<p class="rb-sub">수련회 주제 연계 숏폼 → 담당자 제출 → 야식 시간 상영!</p>';
+  html+='<p class="rb-sub" style="margin-top:6px">📝 파일명 형식 <span style="font-weight:700;color:#3A4535">교구_팀_제출자명</span></p>';
+  html+='<p class="rb-sub" style="margin-bottom:8px;color:#888">ex) 1교구_1팀_홍길동</p>';
   html+='<p class="rb-contact">📨 아래로 전달해주세요</p>';
   html+='<p class="rb-contact">(서은권) 010-7599-5936 또는 cvser@naver.com</p></div>';
   c.innerHTML=html;
+  SPOTS.forEach(function(s){
+    if(!s.imgs||s.imgs.length<=1) return;
+    var el=document.getElementById('ss-'+s.id); if(!el) return;
+    var imgs=el.querySelectorAll('.sc-img'), dots=el.querySelectorAll('.sc-slide-dot'), cur=0;
+    setInterval(function(){
+      imgs[cur].classList.remove('ss-active'); dots[cur].classList.remove('on');
+      cur=(cur+1)%imgs.length;
+      imgs[cur].classList.add('ss-active'); dots[cur].classList.add('on');
+    },5000);
+  });
 }
 
 /* === SCHEDULE VIEW === */
